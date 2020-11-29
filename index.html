@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mocha Jumper</title>
+    <title>Dungeon Breakout</title>
+    <link href="styles.css" rel="stylesheet"/>
 </head>
+
 <body onload="startGame()">
-<p>
-    ####################################################################################################################</p>
-<h1>Mocha Jumper</h1>
 
 <script>
 
@@ -15,8 +14,26 @@
     var myObstacles = [];
     var myScore;
 
+    for (let i = 0; i < screen.availWidth - 54; i += 18) {
+        var spike = document.createElement("IMG");
+        spike.setAttribute("src", "spikes.png");
+        spike.setAttribute("width", "18");
+        spike.setAttribute("height", "22");
+        spike.setAttribute("alt", "Spike");
+        document.body.appendChild(spike);
+    }
+
+    for (let i = 0; i < screen.availWidth - 48; i += 24) {
+        var brick = document.createElement("IMG");
+        brick.setAttribute("src", "bricks.png");
+        brick.setAttribute("width", "24");
+        brick.setAttribute("height", "24");
+        brick.setAttribute("alt", "Bricks");
+        document.body.appendChild(brick);
+    }
+
     function startGame() {
-        myGamePiece = new component(30, 30, "red", 10, 120);
+        myGamePiece = new component(30, 30, "brown", 10, 120);
         myGamePiece.gravity = 0.05;
         myScore = new component("30px", "Consolas", "black", 10, 40, "text");
         myGameArea.start();
@@ -25,7 +42,7 @@
     var myGameArea = {
         canvas: document.createElement("canvas"),
         start: function () {
-            this.canvas.width = 960;
+            this.canvas.width = screen.availWidth;
             this.canvas.height = 270;
             this.context = this.canvas.getContext("2d");
             document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -92,30 +109,37 @@
     function updateGameArea() {
         var x, height, gap, minHeight, maxHeight, minGap, maxGap;
         for (i = 0; i < myObstacles.length; i += 1) {
-            if (myGamePiece.crashWith(myObstacles[i])) {
+            if (myGamePiece.crashWith(myObstacles[i]) && myGameArea.frameNo < 3500) {
                 gameOver();
             }
         }
         myGameArea.clear();
         myGameArea.frameNo += 1;
-        if (myGameArea.frameNo == 1 || everyinterval(150)) {
+        if (myGameArea.frameNo < 2000) {
+            if (myGameArea.frameNo == 1 || everyinterval(150)) {
+                x = myGameArea.canvas.width;
+                minHeight = 20;
+                maxHeight = 200;
+                height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+                minGap = 75;
+                maxGap = 200;
+                gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+                myObstacles.push(new component(40, height, "gray", x, 0));
+                myObstacles.push(new component(40, x - height - gap, "gray", x, height + gap));
+            }
+        } else if (myGameArea.frameNo > 3800) {
             x = myGameArea.canvas.width;
-            minHeight = 20;
-            maxHeight = 200;
-            height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
-            minGap = 50;
-            maxGap = 200;
-            gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-            myObstacles.push(new component(10, height, "green", x, 0));
-            myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
+            myObstacles.push(new component(10000, 270, "skyblue", x, 0));
         }
-        if(myGamePiece.y < 0){
+        if (myGamePiece.y < 0) {
             accelerate(0.18);
-            if(myGamePiece.y < -5)
+            if (myGamePiece.y < -5)
                 accelerate(0.2);
-            if(myGamePiece.y < -10)
+            if (myGamePiece.y < -10)
                 accelerate(myGamePiece.y * -0.18);
         }
+        if (myGameArea.frameNo >= 5000)
+            youWin();
         for (i = 0; i < myObstacles.length; i += 1) {
             myObstacles[i].x += -1;
             myObstacles[i].update();
@@ -138,11 +162,24 @@
     }
 
     function gameOver() {
+        window.alert("GAME OVER! \nYour Score: " + myGameArea.frameNo);
         window.location.reload(false);
     }
+
+    function youWin() {
+        window.alert("Congratulations! You have successfully escaped the dungeon! You are now a free man! \nYour Score: " + myGameArea.frameNo);
+        window.location.reload(false);
+    }
+
 </script>
-<button onmousedown="accelerate(-0.18)" onmouseup="accelerate(0.05)">ACCELERATE</button>
-<p>Use the ACCELERATE button to stay in the air</p>
-<p>How long will you survive?</p>
+
+<div id="UI">
+    <h1>Dungeon Breakout</h1>
+    <button onmousedown="accelerate(-0.18)" onmouseup="accelerate(0.05)">ACCELERATE</button>
+    <p>Use the ACCELERATE button to stay in the air</p>
+    <p>You are a prisoner escaping from a dungeon. How long will you survive?</p>
+    <br><br><br><br><br><br><br><br><br><br><br><br>
+</div>
+
 </body>
 </html>
